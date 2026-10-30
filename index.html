@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Declarador Comercial — Simulação CRM Analytics & Streaming ETL (Portfólio Samuel Bassoli)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: #F8FAFC; color: #0F172A; }
+        .tab-active { border-bottom: 3px solid #003865; color: #003865; font-weight: 800; background: #fff; }
+        .tab-inactive { color: #64748B; font-weight: 600; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Top Portfolio Banner -->
+    <div class="bg-[#003865] text-white text-xs py-2 px-4 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+            <span class="bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 px-2 py-0.5 rounded-full font-bold text-[10px]">PORTFÓLIO FULL-STACK & ETL</span>
+            <span>Simulação Interativa com <strong>dados 100% sintéticos</strong> (preservação total de credenciais, banco de dados e sigilo industrial).</span>
+        </div>
+        <div class="flex items-center gap-4 font-semibold">
+            <a href="https://github.com/SamBassoIi/declarador-crm-analytics" target="_blank" rel="noopener" class="hover:text-sky-300 underline">Ver Arquitetura no GitHub ↗</a>
+            <a href="https://www.linkedin.com/in/samueldeoliveirabassoli/" target="_blank" rel="noopener" class="hover:text-sky-300 underline">LinkedIn — Samuel Bassoli ↗</a>
+        </div>
+    </div>
+
+    <!-- Header Principal -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <span class="text-xl font-black text-[#003865] tracking-tight">VÉRTICE INDUSTRIAL</span>
+                <span class="text-slate-300 font-bold">|</span>
+                <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Declarador Comercial — CRM Analytics</span>
+                <span class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    ● SQLite Mirror Simulado
+                </span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="btn-sync-etl" class="text-xs font-bold px-4 py-2 bg-[#003865] hover:bg-[#002847] text-white rounded-xl transition cursor-pointer shadow-sm">
+                    🔄 Simular Streaming ETL (API REST)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Barra Simulada de Progresso Streaming ETL -->
+    <div id="etl-live-banner" class="hidden bg-sky-950 text-white px-4 py-3 border-b border-sky-800">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-3">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-sky-400 animate-ping"></span>
+                <span id="etl-step-label" class="font-bold">Autenticando via Challenge-Response MD5...</span>
+            </div>
+            <div class="w-full sm:w-80 bg-sky-900 rounded-full h-2.5 overflow-hidden">
+                <div id="etl-progress-bar" class="bg-sky-400 h-full transition-all duration-200" style="width: 8%"></div>
+            </div>
+            <span id="etl-pct-label" class="font-mono font-bold text-sky-300">8%</span>
+        </div>
+    </div>
+
+    <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-5 flex-1">
+
+        <!-- Filtros em Cascata do Funil -->
+        <section class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                <div>
+                    <h2 class="text-xs font-extrabold uppercase tracking-wider text-[#003865]">Filtros Multidimensionais do Funil CRM</h2>
+                    <p class="text-[11px] text-slate-500">Explore os 3 Pilares (Win Rate, Pipeline Ponderado e Ciclo Médio) em tempo real.</p>
+                </div>
+                <button id="btn-reset" class="text-xs font-bold px-3 py-1.5 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-lg transition cursor-pointer">
+                    Limpar Filtros
+                </button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Período</label>
+                    <select id="f-year" class="w-full text-xs font-semibold border border-slate-200 rounded-lg px-3 py-2 bg-slate-50">
+                        <option value="ALL">Histórico Completo (2024–2026)</option>
+                        <option value="2026">2026</option>
+                        <option value="2025">2025</option>
+                        <option value="2024">2024</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Unidade de Venda</label>
+                    <select id="f-unit" class="w-full text-xs font-semibold border border-slate-200 rounded-lg px-3 py-2 bg-slate-50">
+                        <option value="ALL">Todas as Unidades</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Vendedor / Conta</label>
+                    <select id="f-seller" class="w-full text-xs font-semibold border border-slate-200 rounded-lg px-3 py-2 bg-slate-50">
+                        <option value="ALL">Todos os Vendedores</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Complexidade Engenharia</label>
+                    <select id="f-eng" class="w-full text-xs font-semibold border border-slate-200 rounded-lg px-3 py-2 bg-slate-50">
+                        <option value="ALL">Todas (Padrão & Customizado)</option>
+                        <option value="Customizado">Projeto Customizado</option>
+                        <option value="Padrão">Equipamento Padrão</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Abas -->
+        <div class="flex border-b border-slate-200 gap-2 overflow-x-auto">
+            <button data-tab="pillars" class="nav-tab tab-active px-4 py-2.5 text-xs rounded-t-xl cursor-pointer transition">1. Os 3 Pilares Executivos</button>
+            <button data-tab="sellers" class="nav-tab tab-inactive px-4 py-2.5 text-xs rounded-t-xl cursor-pointer transition">2. Conversão por Vendedor</button>
+            <button data-tab="gallery" class="nav-tab tab-inactive px-4 py-2.5 text-xs rounded-t-xl cursor-pointer transition">3. Telas Reais em Alta Definição</button>
+        </div>
+
+        <!-- ABA 1: 3 PILARES & GRÁFICOS -->
+        <div id="panel-pillars" class="space-y-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm border-l-4 border-l-[#003865]">
+                    <div class="text-[11px] font-bold text-slate-400 uppercase">Taxa de Conversão (Win Rate)</div>
+                    <div id="kpi-winrate" class="text-2xl font-black text-slate-900 mt-1">0%</div>
+                    <div id="kpi-decided" class="text-xs text-slate-500 mt-1">0 ganhas vs 0 perdidas</div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm border-l-4 border-l-sky-500">
+                    <div class="text-[11px] font-bold text-slate-400 uppercase">Pipeline em Aberto</div>
+                    <div id="kpi-open" class="text-2xl font-black text-[#003865] mt-1">R$ 0</div>
+                    <div id="kpi-weighted" class="text-xs font-semibold text-sky-700 mt-1">Forecast Ponderado: R$ 0</div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm border-l-4 border-l-emerald-600">
+                    <div class="text-[11px] font-bold text-slate-400 uppercase">Vendido / Ganho (WON)</div>
+                    <div id="kpi-won" class="text-2xl font-black text-emerald-700 mt-1">R$ 0</div>
+                    <div id="kpi-mc" class="text-xs text-emerald-600 font-semibold mt-1">MC1 média: 0%</div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm border-l-4 border-l-amber-500">
+                    <div class="text-[11px] font-bold text-slate-400 uppercase">Ciclo Médio de Vendas</div>
+                    <div id="kpi-cycle" class="text-2xl font-black text-slate-900 mt-1">0 dias</div>
+                    <div id="kpi-cycle-sub" class="text-xs text-slate-500 mt-1">Lead Time Eng.: 4.3 dias</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <h3 class="text-sm font-extrabold text-slate-900">Evolução Mensal: Vendido/Ganho vs Pipeline & Win Rate (%)</h3>
+                    <p class="text-[11px] text-slate-400 mb-3">Série combinada do espelho SQLite local</p>
+                    <div class="h-72"><canvas id="chart-funnel-evol"></canvas></div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <h3 class="text-sm font-extrabold text-slate-900">Diagnóstico de Motivos de Perda</h3>
+                    <p class="text-[11px] text-slate-400 mb-3">Incidência em oportunidades encerradas sem ganho</p>
+                    <div class="h-72"><canvas id="chart-losses"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 2: CONVERSÃO POR VENDEDOR -->
+        <div id="panel-sellers" class="hidden bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <h3 class="text-sm font-extrabold text-slate-900 mb-1">Eficiência de Conversão, Pipeline e Ciclo por Vendedor</h3>
+            <p class="text-xs text-slate-500 mb-4">Dados sintéticos calculados sobre oportunidades WON, LOST e OPEN</p>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-200 text-[11px] text-slate-400 uppercase">
+                            <th class="py-2.5 px-3">Vendedor</th>
+                            <th class="py-2.5 px-3 text-center">Ganhos</th>
+                            <th class="py-2.5 px-3 text-center">Perdidos</th>
+                            <th class="py-2.5 px-3 text-center">Abertos</th>
+                            <th class="py-2.5 px-3 text-center">Win Rate %</th>
+                            <th class="py-2.5 px-3 text-right">R$ Ganho</th>
+                            <th class="py-2.5 px-3 text-right">R$ Pipeline Aberto</th>
+                            <th class="py-2.5 px-3 text-center">Ciclo Médio</th>
+                        </tr>
+                    </thead>
+                    <tbody id="crm-sellers-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ABA 3: GALERIA DE TELAS HD -->
+        <div id="panel-gallery" class="hidden space-y-6">
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                <h3 class="text-sm font-extrabold text-[#003865] mb-1">Capturas Reais do Sistema Full-Stack (Ambiente Sanitizado)</h3>
+                <p class="text-xs text-slate-500 mb-4">Telas renderizadas em alta resolução (Retina 2x) sobre banco espelhado sintético.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+                        <img src="assets/screenshots/01-lamina-executiva-crm.png" alt="Lâmina Executiva CRM" class="w-full">
+                        <div class="p-3 text-xs font-bold text-slate-700">1. Lâmina Executiva — Os 3 Pilares do Funil</div>
+                    </div>
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+                        <img src="assets/screenshots/02-funil-evolucao-perdas.png" alt="Funil e Perdas" class="w-full">
+                        <div class="p-3 text-xs font-bold text-slate-700">2. Evolução Mensal, Estágios & Motivos de Perda</div>
+                    </div>
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+                        <img src="assets/screenshots/03-conversao-vendedores.png" alt="Conversão Vendedores" class="w-full">
+                        <div class="p-3 text-xs font-bold text-slate-700">3. Taxa de Conversão e Ciclo por Vendedor</div>
+                    </div>
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+                        <img src="assets/screenshots/04-pipeline-engenharia.png" alt="Pipeline Engenharia" class="w-full">
+                        <div class="p-3 text-xs font-bold text-slate-700">4. Pipeline por Estágio & Engenharia de Aplicação</div>
+                    </div>
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+                        <img src="assets/screenshots/05-ciclo-vendas-forecast.png" alt="Ciclo e Forecast" class="w-full">
+                        <div class="p-3 text-xs font-bold text-slate-700">5. Velocidade Comercial, Lead Time & Forecast</div>
+                    </div>
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+                        <img src="assets/screenshots/06-base-auditavel-oportunidades.png" alt="Base Auditável" class="w-full">
+                        <div class="p-3 text-xs font-bold text-slate-700">6. Base Auditável de Oportunidades Espelhadas</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-200 bg-white py-4 px-6 text-center text-xs text-slate-500">
+        Projeto de Portfólio Full-Stack desenvolvido por <strong>Samuel de Oliveira Bassoli</strong> • Dados 100% Sintéticos.
+    </footer>
+
+    <script>
+        const UNITS = ['Refrigeração Industrial', 'Ensaios & Laboratório', 'Controle Térmico', 'Engenharia & Serviços'];
+        const SELLERS = ['Rafael Almeida', 'Juliana Ribeiro', 'Mariana Costa', 'Camila Rocha', 'Bruno Martins', 'Lucas Ferreira'];
+        const LOSSES = ['Preço / Orçamento', 'Prazo de Entrega', 'Projeto Adiado', 'Especificação Técnica', 'Condição Comercial'];
+        const MONTHS_PT = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+        let opportunities = [];
+        let chartEvol = null;
+        let chartLoss = null;
+
+        function fmtMoney(v) {
+            if (v >= 1e6) return `R$ ${(v / 1e6).toFixed(2).replace('.', ',')} mi`;
+            if (v >= 1e3) return `R$ ${(v / 1e3).toFixed(1).replace('.', ',')} mil`;
+            return `R$ ${v.toFixed(0)}`;
+        }
+
+        function generateOpportunities(multiplier = 1) {
+            const list = [];
+            let idx = 0;
+            for (const year of ['2024', '2025', '2026']) {
+                const maxM = year === '2026' ? 10 : 12;
+                for (let m = 1; m <= maxM; m++) {
+                    const n = 10 + Math.floor(Math.random() * 4);
+                    for (let i = 0; i < n; i++) {
+                        const isRecent = year === '2026' && m >= 7;
+                        const r = Math.random();
+                        const status = isRecent
+                            ? (r < 0.42 ? 'OPEN' : r < 0.68 ? 'WON' : 'LOST')
+                            : (r < 0.08 ? 'OPEN' : r < 0.47 ? 'WON' : 'LOST');
+                        const amount = Math.round((95000 + Math.random() * 280000) * (0.9 + idx * 0.015) * multiplier);
+                        const prob = status === 'WON' ? 100 : status === 'LOST' ? 0 : [30, 50, 75, 85][Math.floor(Math.random() * 4)];
+                        list.push({
+                            year,
+                            ym: `${year}-${String(m).padStart(2, '0')}`,
+                            label: `${MONTHS_PT[m - 1]}/${year.slice(2)}`,
+                            unit: UNITS[Math.floor(Math.random() * UNITS.length)],
+                            seller: SELLERS[Math.floor(Math.random() * SELLERS.length)],
+                            eng: Math.random() < 0.62 ? 'Customizado' : 'Padrão',
+                            status,
+                            amount,
+                            weighted: Math.round(amount * (prob / 100)),
+                            mcPct: 40 + Math.random() * 9,
+                            cycle: status === 'OPEN' ? null : 22 + Math.floor(Math.random() * 38),
+                            lossReason: status === 'LOST' ? LOSSES[Math.floor(Math.random() * LOSSES.length)] : null
+                        });
+                    }
+                    idx++;
+                }
+            }
+            opportunities = list;
+        }
+
+        function initFilters() {
+            document.getElementById('f-unit').innerHTML = `<option value="ALL">Todas as Unidades</option>` + UNITS.map(u => `<option value="${u}">${u}</option>`).join('');
+            document.getElementById('f-seller').innerHTML = `<option value="ALL">Todos os Vendedores</option>` + SELLERS.map(s => `<option value="${s}">${s}</option>`).join('');
+        }
+
+        function updateView() {
+            const fy = document.getElementById('f-year').value;
+            const fu = document.getElementById('f-unit').value;
+            const fs = document.getElementById('f-seller').value;
+            const fe = document.getElementById('f-eng').value;
+
+            const data = opportunities.filter(o =>
+                (fy === 'ALL' || o.year === fy) &&
+                (fu === 'ALL' || o.unit === fu) &&
+                (fs === 'ALL' || o.seller === fs) &&
+                (fe === 'ALL' || o.eng === fe)
+            );
+
+            const won = data.filter(o => o.status === 'WON');
+            const lost = data.filter(o => o.status === 'LOST');
+            const open = data.filter(o => o.status === 'OPEN');
+            const decided = won.length + lost.length;
+            const winRate = decided > 0 ? (won.length / decided) * 100 : 0;
+
+            const openSum = open.reduce((s, o) => s + o.amount, 0);
+            const weightedSum = open.reduce((s, o) => s + o.weighted, 0);
+            const wonSum = won.reduce((s, o) => s + o.amount, 0);
+            const avgMc = won.length ? won.reduce((s, o) => s + o.mcPct, 0) / won.length : 0;
+            const closedItems = [...won, ...lost];
+            const avgCycle = closedItems.length ? closedItems.reduce((s, o) => s + o.cycle, 0) / closedItems.length : 0;
+
+            document.getElementById('kpi-winrate').textContent = `${winRate.toFixed(1)}%`;
+            document.getElementById('kpi-decided').textContent = `${won.length} ganhas vs ${lost.length} perdidas (${decided} decididas)`;
+            document.getElementById('kpi-open').textContent = fmtMoney(openSum);
+            document.getElementById('kpi-weighted').textContent = `Forecast Ponderado: ${fmtMoney(weightedSum)}`;
+            document.getElementById('kpi-won').textContent = fmtMoney(wonSum);
+            document.getElementById('kpi-mc').textContent = `MC1 média: ${avgMc.toFixed(1)}%`;
+            document.getElementById('kpi-cycle').textContent = `${avgCycle.toFixed(1)} dias`;
+
+            // Monthly Chart
+            const mMap = {};
+            data.forEach(o => {
+                if (!mMap[o.ym]) mMap[o.ym] = { ym: o.ym, label: o.label, wonAmt: 0, openAmt: 0, w: 0, l: 0 };
+                if (o.status === 'WON') { mMap[o.ym].wonAmt += o.amount; mMap[o.ym].w++; }
+                else if (o.status === 'LOST') { mMap[o.ym].l++; }
+                else { mMap[o.ym].openAmt += o.amount; }
+            });
+            const months = Object.values(mMap).sort((a, b) => a.ym.localeCompare(b.ym)).slice(-14);
+
+            if (chartEvol) chartEvol.destroy();
+            chartEvol = new Chart(document.getElementById('chart-funnel-evol'), {
+                type: 'bar',
+                data: {
+                    labels: months.map(m => m.label),
+                    datasets: [
+                        { type: 'line', label: 'Win Rate (%)', data: months.map(m => (m.w + m.l) ? Math.round((m.w / (m.w + m.l)) * 100) : 0), borderColor: '#0099DA', backgroundColor: '#0099DA', yAxisID: 'y1', tension: 0.3 },
+                        { label: 'Vendido / Ganho (R$)', data: months.map(m => m.wonAmt), backgroundColor: '#059669', borderRadius: 4, yAxisID: 'y' },
+                        { label: 'Pipeline Aberto (R$)', data: months.map(m => m.openAmt), backgroundColor: '#003865', borderRadius: 4, yAxisID: 'y' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { position: 'left' },
+                        y1: { position: 'right', min: 0, max: 100, grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+
+            // Loss Chart
+            const lMap = {};
+            lost.forEach(o => { lMap[o.lossReason] = (lMap[o.lossReason] || 0) + 1; });
+            const lEntries = Object.entries(lMap).sort((a, b) => b[1] - a[1]);
+            if (chartLoss) chartLoss.destroy();
+            chartLoss = new Chart(document.getElementById('chart-losses'), {
+                type: 'bar',
+                data: {
+                    labels: lEntries.map(e => e[0]),
+                    datasets: [{ label: 'Oportunidades Perdidas', data: lEntries.map(e => e[1]), backgroundColor: '#E11D48', borderRadius: 4 }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            // Sellers Table
+            const sMap = {};
+            data.forEach(o => {
+                if (!sMap[o.seller]) sMap[o.seller] = { name: o.seller, w: 0, l: 0, op: 0, wonAmt: 0, openAmt: 0, cycles: [] };
+                const s = sMap[o.seller];
+                if (o.status === 'WON') { s.w++; s.wonAmt += o.amount; s.cycles.push(o.cycle); }
+                else if (o.status === 'LOST') { s.l++; s.cycles.push(o.cycle); }
+                else { s.op++; s.openAmt += o.amount; }
+            });
+            const sList = Object.values(sMap).sort((a, b) => b.wonAmt - a.wonAmt);
+            document.getElementById('crm-sellers-tbody').innerHTML = sList.map(s => {
+                const wr = (s.w + s.l) ? ((s.w / (s.w + s.l)) * 100).toFixed(1) : '0.0';
+                const cyc = s.cycles.length ? (s.cycles.reduce((a, b) => a + b, 0) / s.cycles.length).toFixed(1) : '—';
+                return `
+                    <tr class="border-b border-slate-100 hover:bg-slate-50">
+                        <td class="py-2.5 px-3 font-bold text-slate-900">${s.name}</td>
+                        <td class="py-2.5 px-3 text-center font-bold text-emerald-700">${s.w}</td>
+                        <td class="py-2.5 px-3 text-center font-bold text-rose-600">${s.l}</td>
+                        <td class="py-2.5 px-3 text-center font-semibold text-slate-700">${s.op}</td>
+                        <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold">${wr}%</span></td>
+                        <td class="py-2.5 px-3 text-right font-extrabold text-emerald-700">${fmtMoney(s.wonAmt)}</td>
+                        <td class="py-2.5 px-3 text-right font-bold text-[#003865]">${fmtMoney(s.openAmt)}</td>
+                        <td class="py-2.5 px-3 text-center text-slate-600">${cyc} d</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Simulador visual do Streaming ETL
+        document.getElementById('btn-sync-etl').addEventListener('click', () => {
+            const banner = document.getElementById('etl-live-banner');
+            const bar = document.getElementById('etl-progress-bar');
+            const stepLbl = document.getElementById('etl-step-label');
+            const pctLbl = document.getElementById('etl-pct-label');
+            const btn = document.getElementById('btn-sync-etl');
+            btn.disabled = true;
+            banner.classList.remove('hidden');
+
+            const steps = [
+                [18, 'Handshake REST: GET ?operation=getchallenge + Login MD5...'],
+                [42, 'Streaming VTQL: Extraindo lote paginado de Accounts & Contacts...'],
+                [74, 'Streaming VTQL: Sincronizando Potentials e higienizando valores...'],
+                [95, 'Persistindo índices no espelho SQLite3 (WAL Mode)...'],
+                [100, 'Sincronização concluída! Recalculando os 3 Pilares...']
+            ];
+            let i = 0;
+            const timer = setInterval(() => {
+                const [pct, msg] = steps[i];
+                bar.style.width = `${pct}%`;
+                stepLbl.textContent = msg;
+                pctLbl.textContent = `${pct}%`;
+                i++;
+                if (i >= steps.length) {
+                    clearInterval(timer);
+                    setTimeout(() => {
+                        banner.classList.add('hidden');
+                        btn.disabled = false;
+                        generateOpportunities(0.9 + Math.random() * 0.25);
+                        updateView();
+                    }, 500);
+                }
+            }, 450);
+        });
+
+        document.querySelectorAll('.nav-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.getAttribute('data-tab');
+                document.querySelectorAll('.nav-tab').forEach(b => {
+                    b.className = `nav-tab ${b === btn ? 'tab-active' : 'tab-inactive'} px-4 py-2.5 text-xs rounded-t-xl cursor-pointer transition`;
+                });
+                ['pillars', 'sellers', 'gallery'].forEach(p => {
+                    document.getElementById(`panel-${p}`).classList.toggle('hidden', p !== target);
+                });
+            });
+        });
+
+        ['f-year', 'f-unit', 'f-seller', 'f-eng'].forEach(id => {
+            document.getElementById(id).addEventListener('change', updateView);
+        });
+
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            ['f-year', 'f-unit', 'f-seller', 'f-eng'].forEach(id => document.getElementById(id).value = 'ALL');
+            updateView();
+        });
+
+        initFilters();
+        generateOpportunities(1.0);
+        updateView();
+    </script>
+</body>
+</html>
